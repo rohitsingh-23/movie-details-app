@@ -33,7 +33,7 @@
     var arr= [];
     function search(){
         var input = document.getElementById("name").value;
-        var temp  = fetch(`http://www.omdbapi.com/?s=${input}&apikey=925dca87`)
+        var temp  = fetch(`https://www.omdbapi.com/?s=${input}&apikey=925dca87`)
         .then(function(response){
             // console.log(response.json())
             return response.json();
@@ -78,7 +78,7 @@
 
             var infodiv = document.createElement("div");
             infodiv.setAttribute("id", "infodiv")
-            fetch(`http://www.omdbapi.com/?i=${item.imdbID}&apikey=925dca87`)
+            fetch(`https://www.omdbapi.com/?i=${item.imdbID}&apikey=925dca87`)
             .then(function(response){
                 // console.log(response.json())
                 return response.json()
@@ -132,7 +132,7 @@
         get(entry)
 
         async function get(input){
-            let temp = await fetch(`http://www.omdbapi.com/?s=${input}&apikey=925dca87`);
+            let temp = await fetch(`https://www.omdbapi.com/?s=${input}&apikey=925dca87`);
             let data = await temp.json();
             let movies = data.Search;
             searchResult(movies);
@@ -171,7 +171,7 @@
         find(id)
 
         async function find(id){
-            let temp = await fetch (`http://www.omdbapi.com/?i=${id}&apikey=925dca87`);
+            let temp = await fetch (`https://www.omdbapi.com/?i=${id}&apikey=925dca87`);
             var data = await temp.json();
             // console.log(data)
             displayMovie(data)
@@ -242,7 +242,7 @@
         arr.forEach((item)=>{
             let div = document.createElement("div");
             let img = document.createElement("img");
-            img.src = `http://image.tmdb.org/t/p/w500/${item.poster_path}`
+            img.src = `https://image.tmdb.org/t/p/w500/${item.poster_path}`
             img.id = "trendimg"
             div.append(img);
             let tdet = document.createElement("div");
