@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Find Movie</title>
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/74/74137.png">
+    <link rel="stylesheet" href="./Components/movie App debouncing.css">
+    <script src="./Components/movie App debouncing.js"></script>
+    <script src="https://kit.fontawesome.com/9878c95b8d.js" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div class="top">
+        <button onclick="trending()" id="trending">Trending</button>
+        <div id="input">
+            <input type="text" oninput="debounce(show, 1000)" id="name" placeholder="Search">;
+            <i class="fas fa-search" id="icon"></i>
+        </div>
+        
+        <div id="search-result"></div>
+        <!-- <button>search</button> -->
+    </div>
+    <div id="single"></div>
+    <div id="result"></div>
+    <div id="error"></div>
+</body>
+</html>
+
+<script>
+    document.getElementById("icon").addEventListener("click", search);
+    
+    var arr= [];
+    function search(){
+        var input = document.getElementById("name").value;
+        var temp  = fetch(`http://www.omdbapi.com/?s=${input}&apikey=925dca87`)
+        .then(function(response){
+            // console.log(response.json())
+            return response.json();
+        })
+        .then(function(res){
+            // console.log(res.Search)
+            arr = res.Search;
+            // console.log(res)
+            if(res.Response == "False"){
+                document.getElementById("result").innerHTML = "";
+                var img = document.createElement("img");
+                img.setAttribute("id", "errorimg")
+                img.setAttribute("src", "https://c.tenor.com/DiUjye_MGoAAAAAM/not-found-404error.gif");
+                document.getElementById("error").append(img)
+            }else{
+                display(arr)
+            }
+        })
+    }
+
+    var resultdiv = document.getElementById("result")
+
+    function display(arr){
+        document.getElementById("search-result").innerHTML = null
+        document.getElementById("single").innerHTML = null
+
+        document.getElementById("error").innerHTML = ""
+        resultdiv.innerHTML = ""
+        arr.forEach(function(item){
+            var div = document.createElement("div");
+            div.setAttribute("id", "moviediv");
+
+            var img = document.createElement("img");
+            img.setAttribute("id", "img")
+            img.setAttribute("src", item.Poster);
+
+            var name = document.createElement("h2");
+            name.textContent = item.Title;
+
+            var year = document.createElement("h4");
+            year.textContent = `Year: ${item.Year}`;
+
+            var infodiv = document.createElement("div");
+            infodiv.setAttribute("id", "infodiv")
+            fetch(`http://www.omdbapi.com/?i=${item.imdbID}&apikey=925dca87`)
+            .then(function(response){
+                // console.log(response.json())
+                return response.json()
+            })
+            .then(function(res){
+                rating = res.imdbRating
+                // console.log(res)
+
+                var imdb = document.createElement("h4");
+                imdb.textContent = `IMDB Rating: ${res.imdbRating}`
+                var lang = document.createElement("h4");
+                lang.textContent= `Language: ${res.Language}`
+                var release = document.createElement("h4");
+                release.textContent = `Released: ${res.Released}`
+
+                var time = document.createElement("h4");
+                time.textContent = `Runtime: ${res.Runtime}`;
+
+                var story = document.createElement("p");
+                story.setAttribute("id", "p")
+                story.textContent = `Plot: ${res.Plot}`
+
+                if(res.imdbRating>8.5){
+                    var rec = document.createElement("div");
+                    rec.setAttribute("id", "rec")
+                    rec.textContent = "Recommended"
+                    infodiv.append(name, imdb,   time,release,lang, story, rec)
+                }else{
+                    infodiv.append(name, imdb,   time,release,lang, story)
+                }
+
+                div.append(img,infodiv);
+                resultdiv.append(div)
+            })
+
+        })
+    }
+
+    var run;
+    function debounce(func, delay){
+        clearTimeout(run)
+
+        run = setTimeout(function(){
+            func();
+        }, delay)
+    }
+
+    function show(){
+        var entry = document.getElementById("name").value;
+
+        get(entry)
+
+        async function get(input){
+            let temp = await fetch(`http://www.omdbapi.com/?s=${input}&apikey=925dca87`);
+            let data = await temp.json();
+            let movies = data.Search;
+            searchResult(movies);
+        }
+    }
+
+    function searchResult(arr){
+        document.getElementById("search-result").innerHTML = null
+        arr.forEach((item)=>{
+            let div = document.createElement("div");
+            div.className = "small-result";
+            div.addEventListener("click", function(){
+                showMovie(item)
+            });
+            let img = document.createElement("img");
+            img.src = item.Poster;
+            img.id = "smallimg"
+            let namediv = document.createElement("div");
+            namediv.id = "name-small"
+            let name = document.createElement("p");
+            name.textContent = item.Title;
+            let year = document.createElement("p");
+            year.textContent = `Year: ${item.Year}`
+            namediv.append(name, year);
+            
+            div.append(img, namediv)
+            document.getElementById("search-result").append(div)
+
+        })
+    }
+    
+
+    function showMovie(movie){
+        let id = movie.imdbID;
+
+        find(id)
+
+        async function find(id){
+            let temp = await fetch (`http://www.omdbapi.com/?i=${id}&apikey=925dca87`);
+            var data = await temp.json();
+            // console.log(data)
+            displayMovie(data)
+        }
+    }
+    var single = document.getElementById("single");
+    function displayMovie(movie){
+        document.getElementById("search-result").innerHTML = null
+        resultdiv.innerHTML = null
+        single.innerHTML = null
+
+        let div = document.createElement("div");
+        div.id = "singlemovie"
+        let img = document.createElement("img");
+        img.id = "bigimg";
+        img.src = movie.Poster;
+        let detdiv = document.createElement("div");
+        detdiv.id = "detdiv"
+        let name = document.createElement("h2");
+        name.textContent = movie.Title;
+        let release = document.createElement("p");
+        release.textContent = `Release Date: ${movie.Released}`;
+        let runtime = document.createElement("p");
+        runtime.textContent = `Runtime: ${movie.Runtime}`;
+        let rating = document.createElement("p");
+        rating.textContent = `IMDB Rating: ${movie.imdbRating}`
+        let collection = document.createElement("p");
+        let lang = document.createElement("p");
+        lang.textContent = `Language: ${movie.Language}`
+        collection.textContent = `BoxOffice Collecton: ${movie.BoxOffice}`
+        let director = document.createElement("p");
+        director.textContent = `Director: ${movie.Director}`;
+        let awards = document.createElement("p");
+        awards.textContent = `Awards: ${movie.Awards}`
+        let plot = document.createElement("p");
+        plot.textContent = `Plot: ${movie.Plot}`
+        detdiv.append(name, runtime, rating, release, lang,  collection, director, awards, plot)
+        div.append(img, detdiv);
+        single.append(div)
+
+    }
+
+
+    /// url - http://image.tmdb.org/t/p/w500/${poster_path}`;
+
+    function trending(){
+        // console.log("Tending")
+        let key = "c0f3aa53ec6898272b0eda92d59bc412";
+
+        get(key)
+
+        async function get(key){
+            let url = `https://api.themoviedb.org/3/trending/all/day?api_key=${key}`
+            let temp = await fetch(url);
+
+            let data = await temp.json();
+            let movies = data.results
+            // console.log(data, movies)
+            trendshow(movies)
+        }
+    }
+
+    function trendshow(arr){
+        document.getElementById("search-result").innerHTML = null
+        document.getElementById("single").innerHTML = null
+
+        document.getElementById("result").innerHTML = ""
+        arr.forEach((item)=>{
+            let div = document.createElement("div");
+            let img = document.createElement("img");
+            img.src = `http://image.tmdb.org/t/p/w500/${item.poster_path}`
+            img.id = "trendimg"
+            div.append(img);
+            let tdet = document.createElement("div");
+            tdet.id = "tdet"
+            let name = document.createElement("h2");
+
+            if(item.title !== undefined){
+                name.textContent = item.title;
+            }
+            else{
+                name.textContent = item.original_name;
+            }
+            let releasedate = document.createElement("p");
+            releasedate.textContent = `Release Date: ${item.release_date}`;
+            let imdb = document.createElement("p");
+            imdb.textContent = `IMDB Rating: ${item.vote_average}`;
+            let plot = document.createElement("p");
+            plot.textContent = `Plot: ${item.overview}`;
+            tdet.append(name, imdb, releasedate, plot)
+            document.getElementById("result").append(div, tdet);
+        })
+    }
+
+    
+
+
+
+</script>
